@@ -1,0 +1,44 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block content %}
+{{ block.super }}
+<div id="total-price" style="margin-top: 20px; font-weight: bold; text-align: right; padding-right: 20px;">
+    선택된 항목의 총 금액: <span id="total-amount">0</span>
+</div>
+{% endblock %}
+
+{% block admin_change_list_document_ready %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('input[name="_selected_action"]');
+    const totalElement = document.getElementById('total-amount');
+
+    function updateTotal() {
+        let total = 0;
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const row = checkbox.closest('tr');
+                const priceText = row.querySelector('td.field-formatted_price').textContent;
+                const price = parseInt(priceText.replace(/[^\d]/g, ''));
+                total += price;
+            }
+        });
+        totalElement.textContent = total.toLocaleString();
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateTotal);
+    });
+
+    // 전체 선택 체크박스에 대한 이벤트 리스너
+    const selectAll = document.querySelector('input[name="_selected_action"]');
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            setTimeout(updateTotal, 0);
+        });
+    }
+});
+</script>
+{% endblock %}
