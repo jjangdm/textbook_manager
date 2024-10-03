@@ -60,7 +60,7 @@ def is_superuser(user):
     return user.is_superuser
 
 class CustomAdminSite(admin.AdminSite):
-    site_header = 'mclass manager'
+    site_header = '교재관리시스템'
     site_title = 'mclass manager'
     index_title = "Welcome!"
 

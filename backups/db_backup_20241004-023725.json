@@ -3,7 +3,7 @@
   "model": "admin.logentry",
   "pk": 1,
   "fields": {
-    "action_time": "2024-10-03T22:58:37.501",
+    "action_time": "2024-10-04T02:36:34.330",
     "user": 1,
     "content_type": 7,
     "object_id": "1397",
@@ -16,52 +16,13 @@
   "model": "admin.logentry",
   "pk": 2,
   "fields": {
-    "action_time": "2024-10-03T22:58:52.846",
-    "user": 1,
-    "content_type": 7,
-    "object_id": "1397",
-    "object_repr": "수경 자이스토리 중등수학 2 하 (김민관)",
-    "action_flag": 2,
-    "change_message": "[{\"changed\": {\"fields\": [\"\\uc0c1\\ud0dc\"]}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 3,
-  "fields": {
-    "action_time": "2024-10-03T22:59:40.138",
+    "action_time": "2024-10-04T02:37:16.562",
     "user": 1,
     "content_type": 7,
     "object_id": "1398",
     "object_repr": "이투스 고쟁이 유형심화 중등 3-1 (이은성)",
     "action_flag": 1,
     "change_message": "[{\"added\": {}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 4,
-  "fields": {
-    "action_time": "2024-10-04T01:05:14.786",
-    "user": 1,
-    "content_type": 8,
-    "object_id": "242",
-    "object_repr": "test",
-    "action_flag": 1,
-    "change_message": "[{\"added\": {}}, {\"added\": {\"name\": \"\\uad50\\uc7ac\", \"object\": \"test (test)\"}}]"
-  }
-},
-{
-  "model": "admin.logentry",
-  "pk": 5,
-  "fields": {
-    "action_time": "2024-10-04T01:05:40.910",
-    "user": 1,
-    "content_type": 8,
-    "object_id": "242",
-    "object_repr": "test",
-    "action_flag": 3,
-    "change_message": ""
   }
 },
 {
@@ -281,83 +242,11 @@
   }
 },
 {
-  "model": "auth.permission",
-  "pk": 25,
-  "fields": {
-    "name": "Can add book",
-    "content_type": 7,
-    "codename": "add_book"
-  }
-},
-{
-  "model": "auth.permission",
-  "pk": 26,
-  "fields": {
-    "name": "Can change book",
-    "content_type": 7,
-    "codename": "change_book"
-  }
-},
-{
-  "model": "auth.permission",
-  "pk": 27,
-  "fields": {
-    "name": "Can delete book",
-    "content_type": 7,
-    "codename": "delete_book"
-  }
-},
-{
-  "model": "auth.permission",
-  "pk": 28,
-  "fields": {
-    "name": "Can view book",
-    "content_type": 7,
-    "codename": "view_book"
-  }
-},
-{
-  "model": "auth.permission",
-  "pk": 29,
-  "fields": {
-    "name": "Can add student",
-    "content_type": 8,
-    "codename": "add_student"
-  }
-},
-{
-  "model": "auth.permission",
-  "pk": 30,
-  "fields": {
-    "name": "Can change student",
-    "content_type": 8,
-    "codename": "change_student"
-  }
-},
-{
-  "model": "auth.permission",
-  "pk": 31,
-  "fields": {
-    "name": "Can delete student",
-    "content_type": 8,
-    "codename": "delete_student"
-  }
-},
-{
-  "model": "auth.permission",
-  "pk": 32,
-  "fields": {
-    "name": "Can view student",
-    "content_type": 8,
-    "codename": "view_student"
-  }
-},
-{
   "model": "auth.user",
   "pk": 1,
   "fields": {
-    "password": "pbkdf2_sha256$870000$j0vFtqjaPZlXYUN1SWluV4$rLK8yCdAis53gPlYo32m0EP8ABtNURidfEPotgJdkpc=",
-    "last_login": "2024-10-03T19:42:00.845",
+    "password": "pbkdf2_sha256$870000$wfZkeuIqWOJK1bOqpHMbba$D42K5gpAviUWFkEHS8cNRoIEV6uXBzcMJIlox5sCtPE=",
+    "last_login": "2024-10-04T02:20:29.849",
     "is_superuser": true,
     "username": "admin",
     "first_name": "",
@@ -365,7 +254,7 @@
     "email": "jjangdm@mclass.co.kr",
     "is_staff": true,
     "is_active": true,
-    "date_joined": "2024-10-03T19:40:44.616",
+    "date_joined": "2024-10-04T02:20:16.632",
     "groups": [],
     "user_permissions": []
   }
@@ -436,10 +325,10 @@
 },
 {
   "model": "sessions.session",
-  "pk": "lfnjmsd4b5j4ux9v8csvzqrzfopwu9sn",
+  "pk": "sr30kt6xsig89o37de6367i1pnm6ttlx",
   "fields": {
-    "session_data": ".eJxVjMsOgjAUBf-la9NQKb2tS_d8A7mvWtRAQmFl_HclYaHbMzPnZQbc1jJsVZdhFHMxzpx-N0J-6LQDueN0my3P07qMZHfFHrTafhZ9Xg_376BgLd_a6zmxzx1lCgjJJwjA3lGX2hiBY5szqBC0GgWRvIBowyzQuSZER-b9AfNMOII:1swJHU:k0puF1LGzL5J5CycqDq8F0Qhl8y1bJ1_cetV1-icu-w",
-    "expire_date": "2024-10-17T19:42:00.859"
+    "session_data": ".eJxVjMsOwiAQRf-FtSEMb1269xvIAINUDSSlXRn_3TbpQrfnnHvfLOC61LAOmsOU2YUBO_2yiOlJbRf5ge3eeeptmafI94QfdvBbz_S6Hu3fQcVRt7VFSCiVIRMVlQxgVEluA9aKmIs2KC1lsmS088IXAFEIktNOnm30iX2-6J43zw:1swPV7:rWYE_TJE_ILmMk1f8bXmV_48pLx040IhNILDAkKiOxw",
+    "expire_date": "2024-10-18T02:20:29.864"
   }
 },
 {
@@ -13202,7 +13091,7 @@
     "price": 11000,
     "checking": true,
     "student": 198,
-    "payment_date": "2024-10-03"
+    "payment_date": "2023-12-31"
   }
 },
 {
@@ -13742,7 +13631,7 @@
     "price": 18000,
     "checking": true,
     "student": 198,
-    "payment_date": "2024-10-03"
+    "payment_date": "2023-12-31"
   }
 },
 {
@@ -15254,7 +15143,7 @@
     "price": 13000,
     "checking": true,
     "student": 198,
-    "payment_date": "2024-10-03"
+    "payment_date": "2023-12-31"
   }
 },
 {
@@ -15470,7 +15359,7 @@
     "price": 15000,
     "checking": true,
     "student": 198,
-    "payment_date": "2024-10-03"
+    "payment_date": "2023-12-31"
   }
 },
 {
@@ -15578,7 +15467,7 @@
     "price": 14000,
     "checking": true,
     "student": 198,
-    "payment_date": "2024-10-03"
+    "payment_date": "2023-12-31"
   }
 },
 {
@@ -15746,7 +15635,7 @@
     "price": 14000,
     "checking": true,
     "student": 198,
-    "payment_date": "2024-10-03"
+    "payment_date": "2023-12-31"
   }
 },
 {
