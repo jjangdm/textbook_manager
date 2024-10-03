@@ -9,6 +9,8 @@ class Student(models.Model):
     
     class Meta:
         db_table = 'student'  # 새로운 테이블을 생성하거나, 기존 student 테이블과 연결
+        verbose_name = '학생'
+        verbose_name_plural = '학생'
 
 class Textbook(models.Model):
     student_name = models.CharField(max_length=100, verbose_name="학생")  # ForeignKey 대신 CharField 사용
@@ -24,3 +26,5 @@ class Textbook(models.Model):
     
     class Meta:
         db_table = 'book'
+        verbose_name = '교재'
+        verbose_name_plural = '교재'

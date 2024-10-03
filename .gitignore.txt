@@ -1,0 +1,7 @@
+*.pyc
+__pychche__/
+db.sqlite3
+.env
+*.log
+static/
+media/
