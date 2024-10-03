@@ -1,17 +1,16 @@
 import os
 import logging
 import time
+import shutil
 from django.conf import settings
-from django.core.management import call_command
-
+from django.db import connection
 
 logger = logging.getLogger('backup')
-
 
 def manage_backups(max_backups=5):
     backup_dir = os.path.join(settings.BASE_DIR, 'backups')
     backups = sorted(
-        [f for f in os.listdir(backup_dir) if f.endswith('.json')],
+        [f for f in os.listdir(backup_dir) if f.endswith('.sqlite3')],
         key=lambda x: os.path.getmtime(os.path.join(backup_dir, x)),
         reverse=True
     )
@@ -25,16 +24,16 @@ def backup_database():
         os.makedirs(BACKUP_DIR)
 
     timestamp = time.strftime('%Y%m%d-%H%M%S')
-    backup_file = os.path.join(BACKUP_DIR, f'db_backup_{timestamp}.json')
+    db_path = settings.DATABASES['default']['NAME']
+    backup_file = os.path.join(BACKUP_DIR, f'db_backup_{timestamp}.sqlite3')
 
-    with open(backup_file, 'w') as f:
-        call_command('dumpdata', '--indent', '2', stdout=f)
+    # SQLite 데이터베이스 파일 복사
+    shutil.copy2(db_path, backup_file)
 
     manage_backups()  # 백업 파일 관리 호출
 
     logger.info(f"Database backup created: {backup_file}")
     return f"Database backup created: {backup_file}"
-
 
 def restore_database(backup_file):
     backup_dir = os.path.join(settings.BASE_DIR, 'backups')
@@ -43,8 +42,13 @@ def restore_database(backup_file):
     if not os.path.exists(full_path):
         raise FileNotFoundError(f"Backup file not found: {full_path}")
 
-    call_command('flush', '--noinput')  # 기존 데이터 삭제
-    call_command('loaddata', backup_file)
+    db_path = settings.DATABASES['default']['NAME']
+
+    # 현재 데이터베이스 연결 닫기
+    connection.close()
+
+    # 백업 파일로 현재 데이터베이스 덮어쓰기
+    shutil.copy2(full_path, db_path)
 
     logger.info(f"Database restored from: {backup_file}")
     return f"Database restored from: {backup_file}"
