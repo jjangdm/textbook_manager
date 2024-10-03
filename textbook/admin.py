@@ -2,7 +2,11 @@ from django.conf import settings
 from django.contrib import admin
 from django.utils.html import format_html
 from django.contrib.humanize.templatetags.humanize import intcomma
+
 from .models import Student, Book
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin
+
 from django.utils import timezone
 
 from django.http import HttpResponseRedirect
@@ -107,9 +111,7 @@ class CustomAdminSite(admin.AdminSite):
         return render(request, 'admin/restore.html', {'backups': backups})
     
 
-# admin.site.register(Student, StudentAdmin)
-# admin.site.register(Book, BookAdmin)
-
 admin_site = CustomAdminSite(name='customadmin')
 admin_site.register(Student, StudentAdmin)
 admin_site.register(Book, BookAdmin)
+admin_site.register(User, UserAdmin)
