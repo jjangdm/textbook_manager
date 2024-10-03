@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+    <h1>Restore Database</h1>
+    <form method="post">
+        {% csrf_token %}
+        <select name="backup_file">
+            {% for backup in backups %}
+                <option value="{{ backup }}">{{ backup }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Restore">
+    </form>
+{% endblock %}

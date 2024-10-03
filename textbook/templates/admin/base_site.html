@@ -1,0 +1,11 @@
+{% extends "admin/base_site.html" %}
+
+{% block usertools %}
+    {{ block.super }}
+    {% if request.user.is_superuser %}
+        <div style="float: right; padding-right: 10px;">
+            <a href="{% url 'admin:backup' %}" class="button" style="margin-right: 5px;">Backup Database</a>
+            <a href="{% url 'admin:restore' %}" class="button">Restore Database</a>
+        </div>
+    {% endif %}
+{% endblock %}
