@@ -1,7 +1,8 @@
 from django import forms
-from .models import Textbook
+from textbook.models import Book
+
 
 class TextbookForm(forms.ModelForm):
     class Meta:
-        model = Textbook
-        fields = ['student', 'issue_date', 'book_name', 'price']
+        model = Book
+        fields = ['student', 'input_date', 'book_name', 'price']

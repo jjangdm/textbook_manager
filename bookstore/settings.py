@@ -40,8 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'textbook.apps.TextbookConfig',
+    'django.contrib.humanize',
 ]
 
+# No changes were required in the middle ware as Humanize does not require addition of a middle ware
 
 
 MIDDLEWARE = [
@@ -71,6 +73,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'bookstore.wsgi.application'
 
