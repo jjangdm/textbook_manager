@@ -1,8 +1,9 @@
 # views.py
-
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
+
+from textbook.forms import TextbookForm
 # from .forms import TextbookForm
 from .models import Student, Book
 from django.db.models import Sum, Q
@@ -97,40 +98,76 @@ def mark_as_paid(request, book_id):
     
     return redirect('textbook:student_detail', student_id=book.student.id)
 
-# def search_students(request):
-#     if request.method == 'POST':
-#         student_name = request.POST.get('student_name')
-#         student = get_object_or_404(Student, name=student_name)
-#         textbooks = student.books.all().order_by('input_date')
-#         return render(request, 'students_search.html', {'student': student, 'textbooks': textbooks})
-#     return render(request, 'students_search.html')
 
-# def dashboard(request):
-#     students = Book.objects.annotate(total_unpaid_price=models.Sum('price', filter=models.Q(checking=False))).order_by('-total_unpaid_price')
-#     return render(request, 'dashboard.html', {'students': students})
+def search_students(request):
+    query = request.GET.get('query', '').strip()
+    if query:
+        students = Student.objects.filter(name__icontains=query).values('id', 'name')
+        return JsonResponse(list(students), safe=False)
+    return JsonResponse([], safe=False)
 
-# def mark_as_paid(request, textbook_id):
-#     # Use a form or service layer to handle payments
-#     book = get_object_or_404(Book, id=textbook_id)
-#     book.is_paid = True
-#     book.save()
-#     return JsonResponse({'status': 'success'})
 
-# def mark_all_as_paid(request, student_id):
-#     # Consider using a loop or batch process instead of updating all books at once
-#     student = get_object_or_404(Student, id=student_id)
-#     for book in student.books.all():
-#         book.is_paid = True
-#         book.save()
-#     return JsonResponse({'status': 'success'})
+def get_books(request):
+    query = request.GET.get('term', '')
+    # values()로 가져온 후 파이썬에서 중복 제거
+    books = Book.objects.filter(book_name__icontains=query)\
+        .values('book_name', 'price')\
+        .order_by('book_name')
+    
+    # 중복 제거를 위해 dictionary 사용
+    unique_books = {}
+    for book in books:
+        book_name = book['book_name']
+        if book_name not in unique_books:
+            unique_books[book_name] = book
+    
+    return JsonResponse(list(unique_books.values()), safe=False)
 
-# def new_textbook(request):
-#     if request.method == 'POST':
-#         form = TextbookForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('search_students')
-#     else:
-#         form = TextbookForm()
-#     return render(request, 'new_textbook.html', {'form': form})
 
+def issue_book(request):
+    student_id = request.GET.get('student_id')
+    student = None
+    
+    if student_id:
+        student = get_object_or_404(Student, pk=student_id)
+        
+    if request.method == 'POST':
+        form = TextbookForm(request.POST)
+        if form.is_valid():
+            book = form.save(commit=False)
+            if student_id:
+                book.student = student
+            book.save()
+            messages.success(request, f'{book.book_name} 교재가 {book.student.name} 학생에게 지급되었습니다.')
+            return redirect('textbook:student_detail', student_id=book.student.id)
+    else:
+        initial_data = {}
+        if student:
+            initial_data['student'] = student.id
+        form = TextbookForm(initial=initial_data)
+        
+        # 데이터베이스에서 모든 교재 정보를 가져옴
+        books_queryset = Book.objects.all().values('book_name', 'price')
+        # print(f"Books queryset: {books_queryset.query}")  # 디버깅용
+        
+        # 중복 제거를 위한 dictionary
+        unique_books = {}
+        for book in books_queryset:
+            book_name = book['book_name']
+            if book_name not in unique_books:
+                unique_books[book_name] = {
+                    'book_name': book_name,
+                    'price': book['price']
+                }
+        
+        initial_books = list(unique_books.values())
+        # print(f"Initial books: {initial_books}")  # 디버깅용
+
+    context = {
+        'form': form,
+        'initial_books': initial_books,
+        'selected_student': student,
+        'student_id': student_id
+    }
+
+    return render(request, 'textbook/issue_book.html', context)

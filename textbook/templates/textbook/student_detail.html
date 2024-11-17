@@ -1,4 +1,3 @@
-
 {% extends 'textbook/base.html' %}
 {% load humanize %}
 
@@ -7,7 +6,7 @@
     <div class="col-12">
         {% if messages %}
         {% for message in messages %}
-        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -15,123 +14,84 @@
         {% endif %}
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>{{ student.name }} 학생 상세 정보</h2>
-            <a href="{% url 'textbook:dashboard' %}" class="btn btn-secondary">대시보드로 돌아가기</a>
-        </div>
-
-        <div class="card mb-4">
-            <div class="card-header bg-danger text-white">
-                <h5 class="card-title mb-0">미납 교재 현황 (총 {{ total_unpaid|intcomma }}원)</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>지급일</th>
-                                <th>교재명</th>
-                                <th class="text-end">가격</th>
-                                <th>상태</th>
-                                <th>납부처리</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for book in unpaid_books %}
-                            <tr>
-                                <td>{{ book.input_date|date:"Y-m-d" }}</td>
-                                <td>{{ book.book_name }}</td>
-                                <td class="text-end">{{ book.price|intcomma }}원</td>
-                                <td>
-                                    {% if book.checking %}
-                                    <span class="badge bg-success">확인</span>
-                                    {% else %}
-                                    <span class="badge bg-warning">미확인</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <button type="button" 
-                                            class="btn btn-success btn-sm" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#paymentModal{{ book.id }}">
-                                        납부 처리
-                                    </button>
-
-                                    <!-- 납부 모달 -->
-                                    <div class="modal fade" id="paymentModal{{ book.id }}" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <form action="{% url 'textbook:mark_as_paid' book.id %}" method="post">
-                                                    {% csrf_token %}
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">납부 처리 - {{ book.book_name }}</h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            <label for="payment_date{{ book.id }}" class="form-label">납부일</label>
-                                                            <input type="date" 
-                                                                   class="form-control" 
-                                                                   id="payment_date{{ book.id }}"
-                                                                   name="payment_date"
-                                                                   required
-                                                                   value="{{ today|date:'Y-m-d' }}"
-                                                                   max="{{ today|date:'Y-m-d' }}">
-                                                        </div>
-                                                        <p>가격: {{ book.price|intcomma }}원</p>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                                        <button type="submit" class="btn btn-success">납부 완료</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="5" class="text-center">미납된 교재가 없습니다.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <h2>{{ student.name }} 학생</h2>
+            <div class="d-flex gap-2">
+                <a href="{% url 'textbook:issue_book' %}?student_id={{ student.id }}" class="btn btn-success">교재 추가 지급</a>
+                <a href="{% url 'textbook:dashboard' %}" class="btn btn-secondary">
+                    대시보드로 돌아가기
+                </a>
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h5 class="card-title mb-0">납부 완료 교재 (총 {{ total_paid|intcomma }}원)</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>지급일</th>
-                                <th>교재명</th>
-                                <th class="text-end">가격</th>
-                                <th>납부일</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for book in paid_books %}
-                            <tr>
-                                <td>{{ book.input_date|date:"Y-m-d" }}</td>
-                                <td>{{ book.book_name }}</td>
-                                <td class="text-end">{{ book.price|intcomma }}원</td>
-                                <td>{{ book.payment_date|date:"Y-m-d" }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="4" class="text-center">납부 완료된 교재가 없습니다.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+        <h4 class="mb-3">미납 교재 현황 <small class="text-muted">(총 {{ total_unpaid|intcomma }}원)</small></h4>
+        <div class="table-responsive mb-5">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-danger">
+                    <tr>
+                        <th>지급일</th>
+                        <th>교재명</th>
+                        <th class="text-end">가격</th>
+                        <th>상태</th>
+                        <th class="text-center">액션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in unpaid_books %}
+                    <tr>
+                        <td>{{ book.input_date|date:"Y-m-d" }}</td>
+                        <td>{{ book.book_name }}</td>
+                        <td class="text-end">{{ book.price|intcomma }}원</td>
+                        <td>
+                            {% if book.checking %}
+                            <span class="badge bg-success">확인</span>
+                            {% else %}
+                            <span class="badge bg-warning">미확인</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <form action="{% url 'textbook:mark_as_paid' book.id %}" method="post" 
+                                  class="d-inline-block"
+                                  onsubmit="return confirm('이 교재를 납부 완료로 표시하시겠습니까?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm">납부 완료</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">미납된 교재가 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <h4 class="mb-3">납부 완료 교재 <small class="text-muted">(총 {{ total_paid|intcomma }}원)</small></h4>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-success">
+                    <tr>
+                        <th>지급일</th>
+                        <th>교재명</th>
+                        <th class="text-end">가격</th>
+                        <th>납부일</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book in paid_books %}
+                    <tr>
+                        <td>{{ book.input_date|date:"Y-m-d" }}</td>
+                        <td>{{ book.book_name }}</td>
+                        <td class="text-end">{{ book.price|intcomma }}원</td>
+                        <td>{{ book.payment_date|date:"Y-m-d" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">납부 완료된 교재가 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
