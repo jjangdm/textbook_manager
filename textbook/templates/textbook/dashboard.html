@@ -5,7 +5,12 @@
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2>학생별 미납 현황</h2>
+            <div>
+                <h2>학생별 미납 현황</h2>
+                <p class="text-danger mb-0">
+                    <strong>전체 미납 금액: {{ total_unpaid|intcomma }}원</strong>
+                </p>
+            </div>
             <div class="d-flex gap-2">
                 <a href="{% url 'textbook:issue_book' %}" class="btn btn-success">
                     교재 지급
@@ -41,11 +46,12 @@
                         <th>학생 이름</th>
                         <th class="text-end">미납 금액</th>
                         <th class="text-center">상세보기</th>
+                        <th class="text-center">보고서</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for student in students %}
-                    {% if student.unpaid_amount > 0 %}  <!-- Added this line -->
+                    {% if student.unpaid_amount > 0 %}
                     <tr>
                         <td>{{ student.name }}</td>
                         <td class="text-end">{{ student.unpaid_amount|intcomma }}원</td>
@@ -53,8 +59,31 @@
                             <a href="{% url 'textbook:student_detail' student.id %}" 
                                class="btn btn-primary btn-sm">상세보기</a>
                         </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#reportModal{{ student.id }}">
+                                보고서
+                            </button>
+                            
+                            <!-- Report Modal -->
+                            <div class="modal fade" id="reportModal{{ student.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">보고서 유형 선택</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="d-grid gap-2">
+                                                <a href="{% url 'textbook:generate_report' student.id %}?type=unpaid" class="btn btn-danger">미납 교재 보고서</a>
+                                                <a href="{% url 'textbook:generate_report' student.id %}?type=all" class="btn btn-primary">전체 교재 보고서</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
-                    {% endif %}  <!-- Added this line -->
+                    {% endif %}
                     {% empty %}
                     <tr>
                         <td colspan="3" class="text-center">

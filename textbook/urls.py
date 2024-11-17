@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import generate_report
 
 app_name = 'textbook'
 
@@ -10,4 +11,5 @@ urlpatterns = [
     path('issue-book/', views.issue_book, name='issue_book'),
     path('search-students/', views.search_students, name='search_students'),
     path('get-books/', views.get_books, name='get_books'),
+    path('report/<int:student_id>/', generate_report, name='generate_report'),
 ]
