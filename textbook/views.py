@@ -172,51 +172,80 @@ def get_books(request):
 
 
 def issue_book(request):
-    student_id = request.GET.get('student_id')
+    # POST와 GET에서 모두 student_id를 확인
+    student_id = request.POST.get('student_id') or request.GET.get('student_id')
     student = None
+    initial_books = []
     
+    print(f"DEBUG: Received student_id: {student_id}")  # 디버깅용
+
     if student_id:
-        student = get_object_or_404(Student, pk=student_id)
-        
+        try:
+            student = get_object_or_404(Student, pk=student_id)
+            print(f"DEBUG: Found student: {student.name}")  # 디버깅용
+        except Exception as e:
+            print(f"DEBUG: Error finding student: {e}")  # 디버깅용
+            messages.error(request, "학생을 찾을 수 없습니다.")
+            return redirect('textbook:dashboard')
+
     if request.method == 'POST':
-        form = TextbookForm(request.POST)
-        if form.is_valid():
-            book = form.save(commit=False)
-            if student_id:
-                book.student = student
+        print("DEBUG: POST data:", request.POST)  # 디버깅용
+        
+        try:
+            if not student_id or not student:
+                raise ValueError("학생 정보가 필요합니다.")
+
+            book_name = request.POST.get('book_name')
+            price_str = request.POST.get('price', '0')
+            issue_date = request.POST.get('issue_date')
+
+            # 가격에서 쉼표 제거 및 숫자만 추출
+            price = int(''.join(filter(str.isdigit, price_str)))
+
+            print(f"DEBUG: Processing book: {book_name}, price: {price}, date: {issue_date}")  # 디버깅용
+
+            if not all([book_name, price, issue_date]):
+                raise ValueError("모든 필드를 입력해주세요.")
+
+            # Book 생성 및 저장
+            book = Book(
+                book_name=book_name,
+                price=price,
+                input_date=datetime.strptime(issue_date, '%Y-%m-%d').date(),
+                student=student  # 학생 객체 직접 할당
+            )
             book.save()
-            messages.success(request, f'{book.book_name} 교재가 {book.student.name} 학생에게 지급되었습니다.')
-            return redirect('textbook:student_detail', student_id=book.student.id)
-    else:
-        initial_data = {}
-        if student:
-            initial_data['student'] = student.id
-        form = TextbookForm(initial=initial_data)
-        
-        # 데이터베이스에서 모든 교재 정보를 가져옴
-        books_queryset = Book.objects.all().values('book_name', 'price')
-        # print(f"Books queryset: {books_queryset.query}")  # 디버깅용
-        
-        # 중복 제거를 위한 dictionary
-        unique_books = {}
-        for book in books_queryset:
-            book_name = book['book_name']
-            if book_name not in unique_books:
-                unique_books[book_name] = {
-                    'book_name': book_name,
-                    'price': book['price']
-                }
-        
-        initial_books = list(unique_books.values())
-        # print(f"Initial books: {initial_books}")  # 디버깅용
+
+            print(f"DEBUG: Book saved successfully: {book.id}")  # 디버깅용
+            messages.success(request, f'{book.book_name} 교재가 {student.name} 학생에게 지급되었습니다.')
+            return redirect('textbook:student_detail', student_id=student.id)
+
+        except ValueError as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            print(f"DEBUG: Error saving book: {e}")  # 디버깅용
+            messages.error(request, f'교재 저장 중 오류가 발생했습니다: {str(e)}')
+
+    # 기존 교재 정보 가져오기
+    books_queryset = Book.objects.all().values('book_name', 'price')
+    unique_books = {}
+    for book in books_queryset:
+        book_name = book['book_name']
+        if book_name not in unique_books:
+            unique_books[book_name] = {
+                'book_name': book_name,
+                'price': book['price']
+            }
+
+    initial_books = list(unique_books.values())
 
     context = {
-        'form': form,
         'initial_books': initial_books,
         'selected_student': student,
-        'student_id': student_id
+        'student_id': student_id,  # student_id를 context에 추가
     }
 
+    print(f"DEBUG: Rendering template with context: {context.keys()}")  # 디버깅용
     return render(request, 'textbook/issue_book.html', context)
 
 

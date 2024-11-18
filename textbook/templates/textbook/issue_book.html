@@ -1,22 +1,54 @@
-{% extends 'textbook/base.html' %}
-{% load crispy_forms_tags %}
-{% load humanize %}
 
-{% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <h2 class="mb-4">교재 지급</h2>
+ {% extends 'textbook/base.html' %}
+ {% load crispy_forms_tags %}
+ {% load humanize %}
+ 
+ {% block extra_head %}
+ <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+ <style>
+     .select2-container { width: 100% !important; }
+     .select2-container .select2-selection--single {
+         height: 38px !important;
+         border: 1px solid #ced4da !important;
+         border-radius: 0.375rem !important;
+     }
+     .select2-container--bootstrap-5 .select2-selection {
+         padding: 0.375rem 0.75rem !important;
+         font-size: 1rem !important;
+         line-height: 1.5 !important;
+     }
+     .select2-container--bootstrap-5 .select2-selection--single .select2-selection__arrow {
+         height: 36px !important;
+         width: 30px !important;
+     }
+     .card {
+         border: none;
+         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+     }
+     .card-body { padding: 2rem; }
+     .flatpickr-input { background-color: #fff !important; }
+     .btn + .btn { margin-left: 0.5rem; }
+     .form-label { font-weight: 500; }
+ </style>
+ {% endblock %}
+ 
+ {% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">교재 지급</h2>
 
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
 
+        <div class="card">
+            <div class="card-body">
                 {% if selected_student %}
                     <div class="alert alert-info mb-4">
                         <strong>학생:</strong> {{ selected_student.name }}
@@ -25,24 +57,26 @@
 
                 <form method="post" id="issueBookForm">
                     {% csrf_token %}
-                    {% if student_id %}
-                        <input type="hidden" name="student" value="{{ student_id }}">
-                    {% endif %}
-                    <div class="form-group">
-                        <label for="book_select">교재 선택</label>
-                        <select name="book_name" id="book_select" class="form-control" required>
+                    <input type="hidden" name="student_id" value="{{ student_id }}">
+                    
+                    <div class="form-group mb-3">
+                        <label for="book_select" class="form-label">교재명</label>
+                        <select name="book_name" id="book_select" class="form-select" required>
                             <option value="">교재를 선택하세요</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="price_input">가격</label>
+
+                    <div class="form-group mb-3">
+                        <label for="price_input" class="form-label">가격</label>
                         <input type="text" name="price" id="price_input" class="form-control" required>
                     </div>
-                    <div class="form-group">
-                        <label for="issue_date">지급일</label>
-                        <input type="text" name="issue_date" id="issue_date" class="form-control" required>
+
+                    <div class="form-group mb-3">
+                        <label for="issue_date" class="form-label">지급일</label>
+                        <input type="text" name="issue_date" id="issue_date" class="form-control flatpickr-date" required>
                     </div>
-                    <div class="mt-3">
+
+                    <div class="mt-4">
                         <button type="submit" class="btn btn-success">교재 지급</button>
                         <a href="{% url 'textbook:dashboard' %}" class="btn btn-secondary">취소</a>
                     </div>
@@ -50,214 +84,72 @@
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
-
-{% block extra_scripts %}
-{{ block.super }}
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-<input type="hidden" id="get_books_url" value="{% url 'textbook:get_books' %}">
-{{ initial_books|json_script:"initial-books-data" }}
-
-<script>
-// 전역 변수 선언
-let bookMaxPrices = {};
-
-// 가격을 숫자로 변환하는 헬퍼 함수
-const parsePrice = (priceString) => {
-    if (!priceString) return 0;
-    return parseInt(priceString.toString().replace(/[,]/g, '').match(/\d+/)?.[0] || 0);
-};
-
-// 가격을 포맷팅하는 헬퍼 함수
-const formatPrice = (price) => {
-    if (!price || isNaN(price)) return '0';
-    return new Intl.NumberFormat('ko-KR').format(price);
-};
-
-document.addEventListener('DOMContentLoaded', function() {
-    const $bookSelect = $('#book_select');
-    const $priceInput = $('#price_input');
-
-    // 레이블과 input 연결 수정
-    const labels = document.querySelectorAll('label[for]');
-    labels.forEach(label => {
-        const forAttr = label.getAttribute('for');
-        if (forAttr.startsWith('id_')) {
-            label.setAttribute('for', forAttr.replace('id_', ''));
-        }
-    });
-    
-    // Flatpickr 초기화
-    const fpInstance = flatpickr('#issue_date', {
-        locale: 'ko',
-        dateFormat: 'Y-m-d',
-        altInput: true,
-        altFormat: 'Y년 m월 d일',
-        disableMobile: false,
-        maxDate: 'today',
-        defaultDate: 'today',
-        theme: 'light',
-        monthSelectorType: 'static',
-        yearSelectorType: 'static'
-    });
-    
-    // 초기 데이터 처리
-    try {
-        const initialBooks = JSON.parse(document.getElementById('initial-books-data').textContent);
-        const booksArray = Array.isArray(initialBooks) ? initialBooks : Object.values(initialBooks);
-        
-        booksArray.forEach(book => {
-            if (book && book.book_name) {
-                const price = parsePrice(book.price);
-                bookMaxPrices[book.book_name] = Math.max(bookMaxPrices[book.book_name] || 0, price);
-                
-                const option = new Option(book.book_name, book.book_name, false, false);
-                $bookSelect.append(option);
-            }
-        });
-    } catch (error) {
-        console.error('Error processing initial data:', error);
-    }
-
-    // Select2 초기화
-    $bookSelect.select2({
-        theme: 'bootstrap-5',
-        width: '100%',
-        placeholder: '교재를 선택하세요',
-        allowClear: true,
-        tags: true,
-        dropdownParent: $bookSelect.parent()
-    });
-
-    // 교재 선택 이벤트 처리
-    $bookSelect.on('select2:select', function(e) {
-        const selectedBookName = e.params.data.text;
-        const price = bookMaxPrices[selectedBookName];
-        
-        if (price) {
-            $priceInput.val(formatPrice(price));
-        } else {
-            $priceInput.val('');
-        }
-    }).on('select2:clear', function() {
-        $priceInput.val('');
-    });
-    
-});
-</script>
-
-
-<style>
-    .flatpickr-calendar {
-        background: #fff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-    }
-    
-    .flatpickr-day.selected {
-        background: #007bff;
-        border-color: #007bff;
-    }
-    
-    .flatpickr-day:hover {
-        background: #e9ecef;
-    }
-    
-    /* Select2 컨테이너 스타일 수정 */
-    .select2-container {
-        display: block;
-        width: 100% !important;
-    }
-    
-    /* 선택된 항목 컨테이너 스타일 */
-    .select2-container .select2-selection--single {
-        height: 38px;
-        display: flex;
-        align-items: center;
-        background-color: #fff;
-    }
-    
-    /* 선택된 텍스트 스타일 */
-    .select2-container .select2-selection--single .select2-selection__rendered {
-        padding: 0.375rem 0.75rem;
-        line-height: 1.5;
-        color: #212529;
-        display: block;
-        width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        background-color: #f8f9fa;  /* 연한 회색 배경 */
-        border-radius: 0.25rem;
-        transition: background-color 0.2s ease;  /* 부드러운 전환 효과 */
-    }
-
-     /* 호버 시 배경색 살짝 진하게 */
-     .select2-container .select2-selection--single:hover .select2-selection__rendered {
-        background-color: #e9ecef;
-    }
-    
-    /* Clear 버튼(x 표시) 스타일 */
-    .select2-container .select2-selection--single .select2-selection__clear {
-        position: absolute;
-        right: 25px;
-        top: 50%;
-        transform: translateY(-50%);
-        margin-right: 0;
-        font-size: 1.2em;
-        color: #6c757d;
-        cursor: pointer;
-    }
-    
-    /* 화살표 스타일 */
-    .select2-container .select2-selection--single .select2-selection__arrow {
-        height: 100%;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: 25px;
-    }
-    
-    /* 드롭다운 메뉴 스타일 */
-    .select2-dropdown {
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    /* 검색 필드 스타일 */
-    .select2-search--dropdown .select2-search__field {
-        width: 100%;
-        padding: 0.375rem 0.75rem;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-    }
-    
-    /* 폼 그룹 컨테이너 스타일 */
-    .form-group {
-        position: relative;
-        margin-bottom: 1rem;
-    }
-    
-    /* Select2 컨테이너가 폼 그룹 내부에 제대로 위치하도록 */
-    .form-group .select2-container {
-        position: relative;
-        z-index: 1;
-    }
-    
-    /* 선택된 항목이 폼 내부에 유지되도록 */
-    .select2--selection {
-        position: relative !important;
-        z-index: 2;
-    }
-    
-    /* 드롭다운이 다른 요소들 위에 표시되도록 */
-    .select2--dropdown {
-        z-index: 3;
-    }
-</style>
-{% endblock %}
+ 
+ {% block extra_scripts %}
+ <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+ 
+ {{ initial_books|json_script:"initial-books-data" }}
+ 
+ <script>
+ document.addEventListener('DOMContentLoaded', function() {
+     const bookMaxPrices = {};
+     
+     const parsePrice = (priceString) => {
+         if (!priceString) return 0;
+         return parseInt(priceString.toString().replace(/[,]/g, '').match(/\d+/)?.[0] || 0);
+     };
+ 
+     const formatPrice = (price) => {
+         if (!price || isNaN(price)) return '0';
+         return new Intl.NumberFormat('ko-KR').format(price);
+     };
+     
+     try {
+         const initialBooks = JSON.parse(document.getElementById('initial-books-data').textContent);
+         initialBooks.forEach(book => {
+             if (book && book.book_name) {
+                 const price = parsePrice(book.price);
+                 bookMaxPrices[book.book_name] = price;
+                 const option = new Option(book.book_name, book.book_name, false, false);
+                 $('#book_select').append(option);
+             }
+         });
+     } catch (error) {
+         console.error('Error processing initial data:', error);
+     }
+ 
+     $('#book_select').select2({
+         theme: 'bootstrap-5',
+         width: '100%',
+         placeholder: '교재를 선택하세요',
+         allowClear: true,
+         tags: true,
+         dropdownParent: $('#book_select').parent()
+     });
+ 
+     $('#book_select').on('select2:select', function(e) {
+         const selectedBookName = e.params.data.text;
+         const price = bookMaxPrices[selectedBookName];
+         if (price) {
+             $('#price_input').val(formatPrice(price));
+         } else {
+             $('#price_input').val('');
+         }
+     }).on('select2:clear', function() {
+         $('#price_input').val('');
+     });
+     
+     flatpickr('#issue_date', {
+         locale: 'ko',
+         dateFormat: 'Y-m-d',
+         altInput: true,
+         altFormat: 'Y년 m월 d일',
+         defaultDate: 'today',
+         maxDate: 'today'
+     });
+ });
+ </script>
+ {% endblock %}
