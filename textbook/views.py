@@ -351,7 +351,7 @@ def generate_report(request, student_id):
     summary_data = []
     if report_type == 'unpaid':
         summary_data = [
-            ['미납된 교재 수:', f"{unpaid_books.count()}권"],  # 수정된 부분
+            ['미납된 교재 수:', f"{unpaid_books.count()}권"],
             ['미납 금액:', f"{'{:,}'.format(total_unpaid)}원"],
         ]
     else:
@@ -372,19 +372,19 @@ def generate_report(request, student_id):
     elements.append(summary_table)
     elements.append(Spacer(1, 20))
 
-    # 미납 교재 목록
-    if report_type == 'unpaid' or report_type == 'all':
+    # 미납 교재 목록 (report_type이 'unpaid'일 때만)
+    if report_type == 'unpaid':
         elements.append(Paragraph("미납 교재 목록", styles['KoreanTitle']))
         elements.append(Spacer(1, 10))
         
-        unpaid_data = [['No.', '지급일', '교재명', '가격', '상태']]  # '��재명'을 '교재명'으로 수정
+        unpaid_data = [['No.', '지급일', '교재명', '가격', '상태']]
         for idx, book in enumerate(unpaid_books, 1):
             unpaid_data.append([
                 str(idx),
                 book.input_date.strftime('%Y-%m-%d'),
                 book.book_name,
                 f"{'{:,}'.format(book.price)}원",
-                "확인" if book.checking else "미납"  # "미확인"을 "미납"으로 변경
+                '확인' if book.checking else '미확인'
             ])
         
         col_widths = [15*mm, 30*mm, 65*mm, 30*mm, 30*mm]
@@ -392,20 +392,19 @@ def generate_report(request, student_id):
         unpaid_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'NotoSansKR'),
             ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # 모든 헤더를 가운데 정렬
-            ('ALIGN', (0, 1), (0, -1), 'CENTER'),  # No. 열
-            ('ALIGN', (1, 1), (1, -1), 'CENTER'),  # 지급일 열
-            ('ALIGN', (2, 1), (2, -1), 'LEFT'),    # 교재명 열 내용만 왼쪽 정렬
-            ('ALIGN', (3, 1), (3, -1), 'RIGHT'),   # ��격 열 내용만 오른쪽 정렬
-            ('ALIGN', (4, 1), (4, -1), 'CENTER'),  # 상태 열
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+            ('ALIGN', (1, 1), (1, -1), 'CENTER'),
+            ('ALIGN', (2, 1), (2, -1), 'LEFT'),
+            ('ALIGN', (3, 1), (3, -1), 'RIGHT'),
+            ('ALIGN', (4, 1), (4, -1), 'CENTER'),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
         ]))
-        elements.append(unpaid_table)  # 테이블 추가
+        elements.append(unpaid_table)
 
-    # 전체 교재 목록 (report_type이 'all'인 경우에만)
+    # 전체 교재 목록 (report_type이 'all'일 때)
     if report_type == 'all':
-        elements.append(PageBreak())
         elements.append(Paragraph("전체 교재 목록", styles['KoreanTitle']))
         elements.append(Spacer(1, 10))
 
@@ -416,35 +415,33 @@ def generate_report(request, student_id):
                 book.input_date.strftime('%Y-%m-%d'),
                 book.book_name,
                 f"{'{:,}'.format(book.price)}원",
-                "납부완료" if book.payment_date else "미납",  # "미납" 텍스트 수정
-                book.payment_date.strftime('%Y-%m-%d') if book.payment_date else "-"
+                '납부완료' if book.payment_date else '미납',
+                book.payment_date.strftime('%Y-%m-%d') if book.payment_date else '-'
             ])
-        
-        # TABLE_WIDTH를 기준으로 열 너비 비율 조정
+
         col_widths = [
-            TABLE_WIDTH * 0.08,  # No.
-            TABLE_WIDTH * 0.15,  # 지급일
-            TABLE_WIDTH * 0.35,  # 교재명 (가장 넓게)
-            TABLE_WIDTH * 0.15,  # 가격
-            TABLE_WIDTH * 0.12,  # 납부상태
-            TABLE_WIDTH * 0.15   # 납부일
+            TABLE_WIDTH * 0.08,
+            TABLE_WIDTH * 0.15,
+            TABLE_WIDTH * 0.35,
+            TABLE_WIDTH * 0.15,
+            TABLE_WIDTH * 0.12,
+            TABLE_WIDTH * 0.15
         ]
-        # 합계: 1.0 (100%)
         all_table = Table(all_data, colWidths=col_widths)
         all_table.setStyle(TableStyle([
             ('FONTNAME', (0, 0), (-1, -1), 'NotoSansKR'),
             ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # 모든 헤더를 가운데 정렬
-            ('ALIGN', (0, 1), (0, -1), 'CENTER'),  # No. 열
-            ('ALIGN', (1, 1), (1, -1), 'CENTER'),  # 지급일 열
-            ('ALIGN', (2, 1), (2, -1), 'LEFT'),    # 교재명 열 내용만 왼쪽 정렬
-            ('ALIGN', (3, 1), (3, -1), 'RIGHT'),   # 가격 열 내용만 오른쪽 정렬
-            ('ALIGN', (4, 1), (4, -1), 'CENTER'),  # 납부상태 열
-            ('ALIGN', (5, 1), (5, -1), 'CENTER'),  # 납부일 열
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('ALIGN', (0, 1), (0, -1), 'CENTER'),
+            ('ALIGN', (1, 1), (1, -1), 'CENTER'),
+            ('ALIGN', (2, 1), (2, -1), 'LEFT'),
+            ('ALIGN', (3, 1), (3, -1), 'RIGHT'),
+            ('ALIGN', (4, 1), (4, -1), 'CENTER'),
+            ('ALIGN', (5, 1), (5, -1), 'CENTER'),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
             ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
         ]))
-        elements.append(all_table)  # 테이블 추가
+        elements.append(all_table)
 
     # PDF 생성을 위한 캔버스 메이커 함수 수정
     def canvas_maker(filename, pagesize, *args, **kwargs):
