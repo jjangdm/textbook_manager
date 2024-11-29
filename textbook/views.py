@@ -1,9 +1,6 @@
-# views.py
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib import messages
-from textbook.forms import TextbookForm
-# from .forms import TextbookForm
 from .models import Student, Book
 from django.db.models import Sum, Q
 from datetime import date
@@ -15,11 +12,12 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, Frame, PageTemplate, BaseDocTemplate
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from django.conf import settings
 import os
+from urllib.parse import quote
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -261,7 +259,7 @@ def generate_report(request, student_id):
     
     all_books = student.books.all().order_by('input_date')
     unpaid_books = student.books.filter(payment_date__isnull=True)
-    paid_books = student.books.filter(payment_date__isnull=False)
+    # paid_books = student.books.filter(payment_date__isnull=False)
     
     # 통계 계산
     total_books = all_books.count()
@@ -384,7 +382,7 @@ def generate_report(request, student_id):
                 book.input_date.strftime('%Y-%m-%d'),
                 book.book_name,
                 f"{'{:,}'.format(book.price)}원",
-                '확인' if book.checking else '미확인'
+                '납부완료' if book.checking else '미납'
             ])
         
         col_widths = [15*mm, 30*mm, 65*mm, 30*mm, 30*mm]
@@ -452,10 +450,14 @@ def generate_report(request, student_id):
     
     # 파일명 설정
     report_name = "미납교재" if report_type == 'unpaid' else "전체교재"
-    filename = f"{student.name}_{report_name}_보고서_{date.today()}.pdf"
+    filename = f"{student.name}_{report_name}_현황_{date.today()}.pdf"
+    # filename = f"{title}_{date.today()}.pdf"
     
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    # response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+    # 아래 코드는 바로 다운로드가 되는 코드
+    response['Content-Disposition'] = f'attachment; filename*=UTF-8\'\'{quote(filename)}'
     response.write(buffer.getvalue())
     buffer.close()
     
