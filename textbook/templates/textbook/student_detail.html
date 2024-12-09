@@ -49,11 +49,10 @@
                             {% endif %}
                         </td>
                         <td class="text-center">
-                            <form action="{% url 'textbook:mark_as_paid' book.id %}" method="post" 
-                                  class="d-inline-block"
-                                  onsubmit="return confirm('이 교재를 납부 완료로 표시하시겠습니까?');">
+                            <form action="{% url 'textbook:mark_as_paid' book.id %}" method="post" class="d-inline-block" onsubmit="return validateDate(this);">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-success btn-sm">납부 완료</button>
+                                <input type="date" name="payment_date" value="{{ today|date:'Y-m-d' }}" class="form-control form-control-sm" id="paymentDate_{{book.id}}">
+                                <button type="submit" class="btn btn-success btn-sm mt-1">납부 완료</button>
                             </form>
                         </td>
                     </tr>
@@ -95,4 +94,18 @@
         </div>
     </div>
 </div>
+
+<script>
+function validateDate(form) {
+    var dateInput = form.querySelector('input[type="date"]');
+    var dateValue = dateInput.value;
+
+    if (!dateValue) {
+        alert('납부일을 선택해주세요.');
+        return false;
+    }
+    // You could add more sophisticated date validation here if needed.
+    return true;
+}
+</script>
 {% endblock %}

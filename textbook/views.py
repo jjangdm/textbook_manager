@@ -126,10 +126,9 @@ def student_detail(request, student_id):
     }
     return render(request, 'textbook/student_detail.html', context)
 
-
 def mark_as_paid(request, book_id):
     book = get_object_or_404(Book, id=book_id)
-    
+
     if request.method == 'POST':
         payment_date_str = request.POST.get('payment_date')
         try:
@@ -137,11 +136,12 @@ def mark_as_paid(request, book_id):
             book.payment_date = payment_date
             book.save()
             messages.success(request, f'{book.book_name} 교재가 납부 완료되었습니다.')
-        except (ValueError, TypeError):
-            messages.error(request, '올바른 날짜 형식을 입력해주세요.')
-    
-    return redirect('textbook:student_detail', student_id=book.student.id)
+        except ValueError as e:  # More specific exception handling
+            messages.error(request, f'잘못된 날짜 형식입니다. YYYY-MM-DD 형식으로 입력해주세요. 오류: {e}')
+        except Exception as e:
+            messages.error(request, f'납부 완료 중 오류가 발생했습니다: {str(e)}')
 
+    return redirect('textbook:student_detail', student_id=book.student.id)
 
 def search_students(request):
     query = request.GET.get('query', '').strip()
@@ -461,4 +461,5 @@ def generate_report(request, student_id):
     response.write(buffer.getvalue())
     buffer.close()
     
+    return response
     return response
