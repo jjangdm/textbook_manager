@@ -1,4 +1,7 @@
-{% extends 'textbook/base.html' %} {% load humanize %} {% block content %}
+{% extends 'textbook/base.html' %}
+{% load humanize %}
+{% block content %}
+
 <div class="row">
   <div class="col-12">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -20,10 +23,9 @@
         <input
           type="search"
           name="search"
-          class="form-control"
+          class="form-control search-input max-width-300"
           placeholder="학생 이름으로 검색..."
           value="{{ search_query }}"
-          style="max-width: 300px"
         />
         <button type="submit" class="btn btn-primary">검색</button>
         {% if search_query %}
@@ -36,8 +38,7 @@
 
     {% if search_query %}
     <div class="alert alert-info mb-4">
-      <strong>"{{ search_query }}"</strong> 검색 결과: {{ total_students }}명의
-      학생이 검색되었습니다.
+      <strong>"{{ search_query }}"</strong> 검색 결과: {{ total_students }}명의 학생이 검색되었습니다.
     </div>
     {% endif %}
 
@@ -127,7 +128,7 @@
           <a
             class="page-link"
             href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}"
-            >&laquo; 처음</a
+            >« 처음</a
           >
         </li>
         <li class="page-item">
@@ -157,7 +158,7 @@
           <a
             class="page-link"
             href="?page={{ total_pages }}{% if search_query %}&search={{ search_query }}{% endif %}"
-            >마지막 &raquo;</a
+            >마지막 »</a
           >
         </li>
         {% endif %}
