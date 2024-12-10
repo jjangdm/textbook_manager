@@ -71,6 +71,9 @@ def dashboard(request):
     # 검색 적용
     if search_query:
         students = students.filter(name__icontains=search_query)
+    else:
+        # 검색어가 없을 때만 미납금액이 있는 학생만 필터
+        students = students.filter(unpaid_amount__gt=0)
     
     students = students.order_by('name')
     
@@ -229,7 +232,7 @@ def issue_book(request):
     unique_books = {}
     for book in books_queryset:
         book_name = book['book_name']
-        if book_name not in unique_books:
+        if (book_name not in unique_books):
             unique_books[book_name] = {
                 'book_name': book_name,
                 'price': book['price']
@@ -450,7 +453,7 @@ def generate_report(request, student_id):
     
     # 파일명 설정
     report_name = "미납교재" if report_type == 'unpaid' else "전체교재"
-    filename = f"{student.name}_{report_name}_현황.pdf" # _{date.today()}를 붙일 수도 있음
+    filename = f"{student.name}_{report_name}_현황.pdf" # _{date.today()}를 붙��� 수도 있음
     # filename = f"{title}_{date.today()}.pdf"
     
     response = HttpResponse(content_type='application/pdf')
@@ -461,5 +464,4 @@ def generate_report(request, student_id):
     response.write(buffer.getvalue())
     buffer.close()
     
-    return response
     return response
