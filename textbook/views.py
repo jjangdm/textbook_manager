@@ -450,7 +450,7 @@ def generate_report(request, student_id):
     
     # 파일명 설정
     report_name = "미납교재" if report_type == 'unpaid' else "전체교재"
-    filename = f"{student.name}_{report_name}_현황_{date.today()}.pdf"
+    filename = f"{student.name}_{report_name}_현황.pdf" # _{date.today()}를 붙일 수도 있음
     # filename = f"{title}_{date.today()}.pdf"
     
     response = HttpResponse(content_type='application/pdf')
